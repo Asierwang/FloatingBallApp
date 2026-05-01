@@ -1,0 +1,6 @@
+{
+    "debug.internalConsoleOptions": "openOnFirstSessionStart",
+    "diffEditor.renderSideBySide": false,
+    "clawMode.mode": "editor",
+    "workbench.activityBar.location": "default"
+}
