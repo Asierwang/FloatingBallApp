@@ -27,7 +27,8 @@ public class FloatingBallView extends View {
     private float lastTouchX, lastTouchY;
     private long touchStartTime;
     private boolean isDragging = false;
-    private static final int TOUCH_SLOP = 10; // 拖动阈值
+    private static final int TOUCH_SLOP_DP = 10;
+    private int touchSlop;
     
     // 监听器
     private OnBallClickListener clickListener;
@@ -54,8 +55,8 @@ public class FloatingBallView extends View {
     }
     
     private void init() {
-        // 计算悬浮球尺寸
         ballSize = ScreenUtils.calculateBallSize(getContext());
+        touchSlop = (int) (TOUCH_SLOP_DP * getResources().getDisplayMetrics().density + 0.5f);
         
         // 初始化画笔
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -145,7 +146,7 @@ public class FloatingBallView extends View {
         float deltaY = currentY - touchStartY;
         
         // 判断是否开始拖动
-        if (!isDragging && (Math.abs(deltaX) > TOUCH_SLOP || Math.abs(deltaY) > TOUCH_SLOP)) {
+        if (!isDragging && (Math.abs(deltaX) > touchSlop || Math.abs(deltaY) > touchSlop)) {
             isDragging = true;
             // 取消长按检测
             handler.removeCallbacks(longPressRunnable);

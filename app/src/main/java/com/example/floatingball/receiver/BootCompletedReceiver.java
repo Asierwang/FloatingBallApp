@@ -3,6 +3,7 @@ package com.example.floatingball.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import com.example.floatingball.helper.PermissionHelper;
 import com.example.floatingball.service.FloatingBallService;
@@ -23,7 +24,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                 serviceIntent.setAction(FloatingBallService.ACTION_SHOW);
                 
                 // Android 8.0+ 需要使用startForegroundService
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(serviceIntent);
                 } else {
                     context.startService(serviceIntent);

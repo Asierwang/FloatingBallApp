@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.floatingball.helper.PreferencesHelper;
 import com.example.floatingball.service.FloatingBallService;
@@ -41,6 +42,10 @@ public class AppListActivity extends Activity {
         ListView listView = findViewById(R.id.appListView);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
+            if (preferencesHelper.getCustomMenuCount() >= PreferencesHelper.MAX_CUSTOM_MENUS) {
+                Toast.makeText(this, R.string.menu_full, Toast.LENGTH_SHORT).show();
+                return;
+            }
             AppInfo info = appList.get(position);
             int index = preferencesHelper.getCustomMenuCount();
             preferencesHelper.saveCustomMenu(index, info.packageName, info.label);

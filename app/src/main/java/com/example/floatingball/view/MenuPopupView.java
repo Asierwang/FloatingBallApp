@@ -27,7 +27,6 @@ public class MenuPopupView extends LinearLayout {
     private OnMenuItemClickListener itemClickListener;
     private OnAddMenuClickListener addMenuClickListener;
     private boolean isShowing = false;
-    private Context context;
 
     public MenuPopupView(Context context) {
         this(context, null);
@@ -39,7 +38,6 @@ public class MenuPopupView extends LinearLayout {
 
     public MenuPopupView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        this.context = context;
         init(context);
     }
 
@@ -57,7 +55,7 @@ public class MenuPopupView extends LinearLayout {
     public void rebuildMenu() {
         menuContainer.removeAllViews();
 
-        View homeItem = createMenuItem(context.getString(R.string.menu_home), null, null);
+        View homeItem = createMenuItem(getContext().getString(R.string.menu_home), null, null);
         homeItem.setOnClickListener(v -> {
             if (itemClickListener != null) {
                 itemClickListener.onHomeClick();
@@ -92,7 +90,7 @@ public class MenuPopupView extends LinearLayout {
 
         if (count < PreferencesHelper.MAX_CUSTOM_MENUS) {
             addDivider();
-            ImageView addItem = new ImageView(context);
+            ImageView addItem = new ImageView(getContext());
             addItem.setImageResource(android.R.drawable.ic_input_add);
             addItem.setPadding(0, 8, 0, 8);
             LinearLayout.LayoutParams addParams = new LinearLayout.LayoutParams(
@@ -113,7 +111,7 @@ public class MenuPopupView extends LinearLayout {
 
     private View createMenuItem(String text, Drawable icon, String pkg) {
         if (icon != null && pkg != null) {
-            LinearLayout itemLayout = new LinearLayout(context);
+            LinearLayout itemLayout = new LinearLayout(getContext());
             itemLayout.setOrientation(HORIZONTAL);
             itemLayout.setGravity(Gravity.CENTER_VERTICAL);
             itemLayout.setBackgroundResource(R.drawable.menu_item_selector);
@@ -121,14 +119,14 @@ public class MenuPopupView extends LinearLayout {
             itemLayout.setFocusable(true);
             itemLayout.setPadding(8, 0, 8, 0);
 
-            ImageView iv = new ImageView(context);
+            ImageView iv = new ImageView(getContext());
             iv.setImageDrawable(icon);
             LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(28, 28);
             iconParams.setMarginEnd(8);
             iv.setLayoutParams(iconParams);
             itemLayout.addView(iv);
 
-            TextView tv = new TextView(context);
+            TextView tv = new TextView(getContext());
             tv.setText(text);
             tv.setTextSize(14);
             tv.setTextColor(getResources().getColor(R.color.menu_text_color));
@@ -142,7 +140,7 @@ public class MenuPopupView extends LinearLayout {
             itemLayout.setLayoutParams(params);
             return itemLayout;
         } else {
-            TextView tv = new TextView(context);
+            TextView tv = new TextView(getContext());
             tv.setText(text);
             tv.setTextSize(16);
             tv.setTextColor(getResources().getColor(R.color.menu_text_color));
@@ -157,7 +155,7 @@ public class MenuPopupView extends LinearLayout {
     }
 
     private void addDivider() {
-        View divider = new View(context);
+        View divider = new View(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1);
         divider.setLayoutParams(params);
@@ -167,7 +165,7 @@ public class MenuPopupView extends LinearLayout {
 
     private Drawable getAppIcon(String packageName) {
         try {
-            PackageManager pm = context.getPackageManager();
+            PackageManager pm = getContext().getPackageManager();
             return pm.getApplicationIcon(packageName);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
@@ -189,6 +187,7 @@ public class MenuPopupView extends LinearLayout {
 
     public void hideMenu() {
         if (!isShowing) return;
+        isShowing = false;
         ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(this, "alpha", 1f, 0f);
         ObjectAnimator scaleXAnim = ObjectAnimator.ofFloat(this, "scaleX", 1f, 0.5f);
         ObjectAnimator scaleYAnim = ObjectAnimator.ofFloat(this, "scaleY", 1f, 0.5f);
@@ -199,7 +198,7 @@ public class MenuPopupView extends LinearLayout {
             @Override
             public void onAnimationEnd(android.animation.Animator animation) {
                 setVisibility(GONE);
-                isShowing = false;
+                animatorSet.removeListener(this);
             }
         });
         animatorSet.start();

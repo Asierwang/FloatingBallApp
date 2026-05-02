@@ -75,6 +75,7 @@ public class PreferencesHelper {
     
     public void removeCustomMenu(int index) {
         int count = getCustomMenuCount();
+        if (index < 0 || index >= count) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         for (int i = index; i < count - 1; i++) {
             String nextPkg = getCustomMenuPackageName(i + 1);

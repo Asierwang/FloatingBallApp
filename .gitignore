@@ -1,10 +1,8 @@
 # Gradle
 .gradle/
 build/
-!build/
-!src/**/build/
 
-# Local configuration (sdk path, etc.)
+# Local configuration (sdk path, signing keys, etc.)
 local.properties
 
 # IDE
@@ -20,17 +18,19 @@ local.properties
 *.swo
 *~
 
-# Eclipse
+# OS
 .DS_Store
+Thumbs.db
+
+# Android build artifacts
 bin/
 gen/
 gen_external/
 out/
-
-# Android Studio
 /captures/
 *.apk
 *.ap_
+*.aab
 *.dex
 *.class
 *.log
@@ -38,18 +38,14 @@ out/
 
 # Signing
 *.keystore
-!../floatingball-release.keystore
+*.jks
 
 # Preferences
 .preferences
 
-# ProGuard
-proguard/
-*.pro
-
 # Backup
 *.bak
 
-# bulid
-build.md
-build_V19.md
+# Markdown (except README)
+*.md
+!README.md

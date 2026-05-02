@@ -20,9 +20,12 @@ public class ScreenUtils {
     public static int getScreenWidth(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         if (windowManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                return windowManager.getCurrentWindowMetrics().getBounds().width();
+            }
             Display display = windowManager.getDefaultDisplay();
             Point point = new Point();
-            display.getSize(point);
+            display.getRealSize(point);
             return point.x;
         }
         return 0;
@@ -36,9 +39,12 @@ public class ScreenUtils {
     public static int getScreenHeight(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         if (windowManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                return windowManager.getCurrentWindowMetrics().getBounds().height();
+            }
             Display display = windowManager.getDefaultDisplay();
             Point point = new Point();
-            display.getSize(point);
+            display.getRealSize(point);
             return point.y;
         }
         return 0;

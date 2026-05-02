@@ -1,8 +1,12 @@
 package com.example.floatingball.application;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
+import android.os.SystemClock;
 
 import com.example.floatingball.helper.PermissionHelper;
 import com.example.floatingball.service.FloatingBallService;
@@ -38,25 +42,29 @@ public class FloatingBallApplication extends Application {
         
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {
-            // 记录异常日志
             ex.printStackTrace();
             
-            // 尝试重启悬浮球服务
             try {
                 if (PermissionHelper.hasOverlayPermission(getApplicationContext())) {
                     Intent intent = new Intent(getApplicationContext(), FloatingBallService.class);
                     intent.setAction(FloatingBallService.ACTION_SHOW);
-                    startService(intent);
+                    int flags = PendingIntent.FLAG_ONE_SHOT;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        flags |= PendingIntent.FLAG_IMMUTABLE;
+                    }
+                    PendingIntent pendingIntent = PendingIntent.getService(
+                            getApplicationContext(), 0, intent, flags);
+                    AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    am.set(AlarmManager.ELAPSED_REALTIME,
+                            SystemClock.elapsedRealtime() + 3000, pendingIntent);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-            // 调用默认处理器
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(thread, ex);
             } else {
-                // 结束进程
                 Process.killProcess(Process.myPid());
                 System.exit(1);
             }

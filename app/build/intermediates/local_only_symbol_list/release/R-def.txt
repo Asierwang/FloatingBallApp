@@ -14,6 +14,7 @@ color purple_700
 color teal_200
 color teal_700
 color white
+drawable ic_ball_notification
 drawable ic_launcher_foreground
 drawable menu_background
 drawable menu_item_selector
@@ -34,8 +35,10 @@ mipmap ic_launcher_round
 string app_name
 string app_not_installed
 string ball_hidden
+string ball_running
 string go_settings
 string later
+string menu_full
 string menu_home
 string permission_denied
 string permission_granted

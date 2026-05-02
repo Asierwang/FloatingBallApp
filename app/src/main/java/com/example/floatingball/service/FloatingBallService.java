@@ -1,5 +1,8 @@
 package com.example.floatingball.service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -10,6 +13,8 @@ import android.os.Looper;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import androidx.core.app.NotificationCompat;
 
 import com.example.floatingball.AppListActivity;
 import com.example.floatingball.R;
@@ -25,7 +30,8 @@ public class FloatingBallService extends Service {
     public static final String ACTION_HIDE = "com.example.floatingball.HIDE";
     public static final String ACTION_REFRESH_MENU = "com.example.floatingball.REFRESH_MENU";
     
-    private static final int REQUEST_CODE_APP_LIST = 1001;
+    private static final String NOTIFICATION_CHANNEL_ID = "floating_ball";
+    private static final int NOTIFICATION_ID = 1;
     
     private WindowManager windowManager;
     private WindowManager.LayoutParams ballParams;
@@ -47,6 +53,8 @@ public class FloatingBallService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        startForegroundNotification();
         
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         preferencesHelper = new PreferencesHelper(this);
@@ -77,6 +85,8 @@ public class FloatingBallService extends Service {
                     refreshMenu();
                     break;
             }
+        } else if (intent == null) {
+            showFloatingBall();
         }
         
         return START_STICKY;
@@ -240,7 +250,9 @@ public class FloatingBallService extends Service {
         
         ballParams.x = ballX;
         ballParams.y = ballY;
-        windowManager.updateViewLayout(floatingBallView, ballParams);
+        if (floatingBallView != null && floatingBallView.getParent() != null) {
+            windowManager.updateViewLayout(floatingBallView, ballParams);
+        }
         
         if (menuPopupView.isShowing()) {
             menuPopupView.hideMenu();
@@ -292,5 +304,22 @@ public class FloatingBallService extends Service {
     private void startKeepAliveService() {
         Intent intent = new Intent(this, KeepAliveService.class);
         startService(intent);
+    }
+    
+    private void startForegroundNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID, getString(R.string.app_name),
+                    NotificationManager.IMPORTANCE_LOW);
+            channel.setShowBadge(false);
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
+        Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.ball_running))
+                .setSmallIcon(R.drawable.ic_ball_notification)
+                .setOngoing(true)
+                .build();
+        startForeground(NOTIFICATION_ID, notification);
     }
 }

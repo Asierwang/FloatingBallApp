@@ -1,13 +1,20 @@
 package com.example.floatingball.service;
 
+import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
-import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.core.app.NotificationCompat;
+
+import com.example.floatingball.R;
 import com.example.floatingball.helper.PermissionHelper;
 
 /**
@@ -16,29 +23,18 @@ import com.example.floatingball.helper.PermissionHelper;
  */
 public class KeepAliveService extends Service {
     
-    private static final long CHECK_INTERVAL = 5000; // 5秒检查一次
+    private static final String NOTIFICATION_CHANNEL_ID = "keep_alive";
+    private static final int NOTIFICATION_ID = 2;
+    private static final long CHECK_INTERVAL = 5000;
     
     private Handler handler;
     private Runnable checkRunnable;
-    private boolean isServiceRunning = false;
-    
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            isServiceRunning = true;
-        }
-        
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isServiceRunning = false;
-            // 服务断开连接，尝试重启
-            restartFloatingBallService();
-        }
-    };
     
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        startForegroundNotification();
         
         handler = new Handler(Looper.getMainLooper());
         
@@ -75,15 +71,23 @@ public class KeepAliveService extends Service {
     }
     
     private void checkAndRestartService() {
-        // 检查悬浮窗权限
         if (!PermissionHelper.hasOverlayPermission(this)) {
             return;
         }
-        
-        // 如果服务未运行，尝试启动
-        if (!isServiceRunning) {
+        if (!isFloatingBallServiceRunning()) {
             restartFloatingBallService();
         }
+    }
+    
+    private boolean isFloatingBallServiceRunning() {
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (am == null) return false;
+        for (ActivityManager.RunningServiceInfo info : am.getRunningServices(Integer.MAX_VALUE)) {
+            if (FloatingBallService.class.getName().equals(info.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private void restartFloatingBallService() {
@@ -91,9 +95,25 @@ public class KeepAliveService extends Service {
             Intent intent = new Intent(this, FloatingBallService.class);
             intent.setAction(FloatingBallService.ACTION_SHOW);
             startService(intent);
-            isServiceRunning = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    private void startForegroundNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID, "保活服务",
+                    NotificationManager.IMPORTANCE_LOW);
+            channel.setShowBadge(false);
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
+        Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.ball_running))
+                .setSmallIcon(R.drawable.ic_ball_notification)
+                .setOngoing(true)
+                .build();
+        startForeground(NOTIFICATION_ID, notification);
     }
 }

@@ -17,8 +17,10 @@
     <string name="app_name">悬浮球</string>
     <string name="app_not_installed">应用未安装</string>
     <string name="ball_hidden">悬浮球已隐藏，重启应用后恢复</string>
+    <string name="ball_running">悬浮球运行中</string>
     <string name="go_settings">去设置</string>
     <string name="later">稍后再说</string>
+    <string name="menu_full">菜单已满，最多添加6个</string>
     <string name="menu_home">主界面</string>
     <string name="permission_denied">权限被拒绝</string>
     <string name="permission_granted">权限已授予</string>
